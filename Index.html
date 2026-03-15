@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root { 
+      --primary: #ff8c00; 
+      --primary-hover: #ffa500;
+      --secondary: #ffd700; 
+      --bg: #050505; 
+      --panel: #0a0a0c; 
+      --cyan: #00ffff; 
+      --hazard: repeating-linear-gradient(45deg, #ffd700, #ffd700 10px, #111 10px, #111 20px); 
+      --success: #2ea043;
+      --error: #f85149;
+    }
+    
+    body { 
+      margin: 0; 
+      padding: 15px; 
+      background: var(--bg); 
+      color: #eaeaea; 
+      font-family: 'Rajdhani', sans-serif; 
+    }
+    
+    /* En-tête industrielle dynamique */
+    .industrial-header {
+      position: relative; 
+      margin-bottom: 25px; 
+      padding: 35px 10px;
+      background: #111; 
+      border: 2px solid var(--primary);
+      clip-path: polygon(0 0, 100% 0, 100% 80%, 95% 100%, 5% 100%, 0 80%);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .industrial-header:hover {
+      box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+    }
+    
+    .header-title { 
+      font-size: 3.5em; 
+      font-weight: 900; 
+      color: var(--primary); 
+      margin: 0; 
+      text-shadow: 0 0 15px rgba(255,140,0,0.5); 
+      font-family: 'Share Tech Mono', monospace; 
+      letter-spacing: 2px;
+    }
+    
+    .container { 
+      max-width: 900px; 
+      margin: auto; 
+      background: var(--panel); 
+      padding: 25px; 
+      border: 1px solid #333; 
+      position: relative; 
+      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    }
+    
+    .container::before { 
+      content: ""; 
+      position: absolute; 
+      top: -4px; right: 0; left: 0; 
+      height: 4px; 
+      background: var(--hazard); 
+    }
+
+    /* Onglets de navigation */
+    .tabs { 
+      display: flex; 
+      gap: 4px; 
+      margin-bottom: 20px; 
+    }
+    
+    .tab-btn { 
+      background: #111; 
+      color: #666; 
+      border: 1px solid #333; 
+      padding: 14px; 
+      cursor: pointer; 
+      font-family: 'Rajdhani', sans-serif; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      flex: 1; 
+      transition: all 0.2s ease;
+      letter-spacing: 1px;
+    }
+    
+    .tab-btn:hover:not(.active) {
+      background: #1a1a1a;
+      color: #aaa;
+    }
+    
+    .tab-btn.active { 
+      background: var(--primary); 
+      color: #000; 
+      border-color: var(--primary); 
+      box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+    }
+
+    .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; } 
+    .tab-content.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title { 
+      background: #1a1a1a; 
+      border-left: 5px solid var(--primary); 
+      padding: 10px 15px; 
+      margin: 30px 0 15px 0; 
+      text-transform: uppercase; 
+      color: var(--cyan); 
+      font-weight: 700; 
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    label { 
+      font-weight: 700; 
+      margin-top: 15px; 
+      display: block; 
+      color: var(--secondary); 
+      text-transform: uppercase; 
+      font-size: 0.9em;
+      letter-spacing: 1px;
+    }
+    
+    select, input, textarea { 
+      width: 100%; 
+      padding: 12px; 
+      margin-top: 5px; 
+      background: #080808; 
+      color: #fff; 
+      border: 1px solid #333; 
+      font-family: 'Rajdhani', sans-serif; 
+      font-size: 1.1em;
+      box-sizing: border-box; 
+      transition: border-color 0.2s ease;
+    }
+    
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+
+    /* Grilles et Boutons Minerais */
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+      gap: 10px; 
+      margin-top: 10px; 
+    }
+    
+    .ore-btn { 
+      background: #0d0d0d; 
+      border: 1px solid #222; 
+      color: #666; 
+      padding: 12px 5px; 
+      text-align: center; 
+      cursor: pointer; 
+      font-size: 0.9em; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+      user-select: none;
+      border-radius: 2px;
+    }
+    
+    .ore-btn:hover {
+      border-color: #555;
+      color: #aaa;
+    }
+    
+    .ore-btn input { display: none; }
+    
+    .ore-btn.selected { 
+      border-color: #fff; 
+      box-shadow: 0 0 10px rgba(255,255,255,0.1); 
+      transform: scale(1.02);
+    }
+    
+    .tier-s.selected { background: #ff4500; color: #fff; }
+    .tier-b.selected { background: var(--secondary); color: #000; }
+    .tier-fps.selected { background: var(--cyan); color: #000; }
+    .tier-salvage.selected { background: #8a2be2; color: #fff; }
+
+    /* Bouton d'action principal */
+    .btn { 
+      background: var(--primary); 
+      color: #000; 
+      padding: 22px; 
+      border: none; 
+      cursor: pointer; 
+      width: 100%; 
+      font-weight: 900; 
+      font-size: 22px; 
+      margin-top: 35px; 
+      text-transform: uppercase; 
+      transition: all 0.2s ease;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+    }
+    
+    .btn:disabled {
+      background: #333;
+      color: #888;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Cartes Analytics */
+    .stat-card { 
+      background: #111; 
+      border-right: 4px solid var(--cyan); 
+      padding: 20px; 
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateX(5px);
+      background: #151515;
+    }
+    
+    .stat-loc {
+      font-size: 1.2em;
+    }
+    
+    .prob-val { 
+      color: var(--cyan); 
+      font-size: 2em; 
+      font-weight: 900; 
+      font-family: 'Share Tech Mono', monospace;
+    }
+    
+    /* Animations de chargement */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.3);
+      border-radius: 50%;
+      border-top-color: #000;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: var(--cyan);
+      text-align: center;
+      padding: 20px;
+      font-size: 1.2em;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="industrial-header">
+    <div class="header-title">UNIT 404</div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" id="btn-terminal" onclick="switchTab('terminal')">Acquisition</button>
+      <button class="tab-btn" id="btn-analytics" onclick="switchTab('analytics')">Analytics</button>
+    </div>
+
+    <!-- ONGLETS: TERMINAL D'ACQUISITION -->
+    <div id="terminal" class="tab-content active">
+      <form id="miningForm">
+        <label>System</label>
+        <select id="system"></select>
+        
+        <label>Sector / Body</label>
+        <select id="location"></select>
+        
+        <label>POI / Coordinates</label>
+        <input list="poi-list" id="poi" placeholder="Sélectionnez ou tapez vos coordonnées...">
+        <datalist id="poi-list"></datalist>
+        
+        <div class="section-title">Ship Mining (A/S) <span id="count-high" style="font-size:0.6em; color:#fff"></span></div>
+        <div class="grid" id="shipHighGrid"></div>
+        
+        <div class="section-title">Ship Mining (Standard) <span id="count-std" style="font-size:0.6em; color:#fff"></span></div>
+        <div class="grid" id="shipStandardGrid"></div>
+        
+        <div class="section-title">FPS & Vehicle Extraction <span id="count-fps" style="font-size:0.6em; color:#fff"></span></div>
+        <div class="grid" id="fpsGrid"></div>
+        
+        <div class="section-title">Salvage <span id="count-salvage" style="font-size:0.6em; color:#fff"></span></div>
+        <div class="grid" id="salvageGrid"></div>
+        
+        <label>Purity scanner / SCU Amount</label>
+        <input type="number" id="quality" value="0" min="0">
+        
+        <label>Intelligence Logs</label>
+        <textarea id="comment" rows="3" placeholder="Observations et logs additionnels..."></textarea>
+        
+        <button type="button" class="btn" id="submitBtn" onclick="submitForm()">TRANSMIT TELEMETRY</button>
+      </form>
+    </div>
+
+    <!-- ONGLETS: ANALYTIQUE DE PROBABILITES -->
+    <div id="analytics" class="tab-content">
+      <div class="section-title">Probability Model</div>
+      <label>Target Resource</label>
+      <select id="oreTarget" onchange="displayProbability()"></select>
+      
+      <div id="probResult" style="margin-top:20px;">
+        <div class="loading-text">Awaiting telemetry...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ URL DE VOTRE DEPLOIEMENT WEB APP GOOGLE APPS SCRIPT
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwy-mQyv2i_75YiwgU-C1XlENj_bSYkuSZDpZa0X8q5UhotIy2fOkFYMz8kQU5c3IkT/exec";
+
+    // Dictionnaire des localisations du Verse
+    const universeMap = {
+      "Stanton": { 
+        "Hurston": ["Lorville", "Everus Harbor", "HDMS-Edmond", "HDMS-Oparei", "Arial", "Aberdeen", "Magda", "Ita"], 
+        "microTech": ["New Babbage", "Port Tressler", "Calliope", "Clio", "Euterpe"], 
+        "Crusader": ["Orison", "Seraphim", "Cellin", "Daymar", "Yela"], 
+        "ArcCorp": ["Area18", "Baijini", "Lyria", "Wala"] 
+      },
+      "Pyro": { 
+        "Pyro I": ["Lazarus", "RMB-BALM"], 
+        "Pyro II": ["Monox", "Ostler's Claim", "Rustville"], 
+        "Pyro III": ["Bloom", "Bueno Ravine"], 
+        "Pyro IV": [],
+        "Pyro V": ["Fairo", "Fed Canyon Outpost"] 
+      },
+      "Nyx": { 
+        "Delamar": ["Levski"], 
+        "Glaciem Ring": ["Breaker Alpha"] 
+      }
+    };
+
+    // Index des ressources par catégories
+    const ores = {
+      high: ["QUANTANIUM", "BEXALITE", "TARANITE", "LARANITE", "AGRICIUM", "BORASE", "HEPHESTANITE", "GOLD"],
+      std: ["STILERON", "SAVRILIUM", "OURATITE", "RICCITE", "LINDINIUM", "BERYL", "ASLARITE", "TITANIUM", "TUNGSTEN", "TORITE", "TIN", "QUARTZ", "CORUNDUM", "COPPER", "SILICON", "IRON", "ALUMINIUM", "ICE"],
+      fps: ["JANALITE", "FEYNMALINE", "HADANITE", "APHORITE", "DOLIVINE", "GLACOSITE", "BERADUM"],
+      salvage: ["RMC", "CMAT"]
+    };
+
+    let probData = null;
+
+    // GESTION D'INTERFACE
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      document.getElementById('btn-' + tabId).classList.add('active');
+      
+      if(tabId === 'analytics' && !probData) {
+        document.getElementById('probResult').innerHTML = "<div class='loading-text'>Interrogation des databanks...</div>";
+        loadProbabilities();
+      }
+    }
+
+    // LOGIQUE DE LOCALISATION ET SAUVEGARDE LOCALE
+    function updateLocations() {
+      const sys = document.getElementById('system').value;
+      const lSel = document.getElementById('location');
+      lSel.innerHTML = "";
+      
+      if (universeMap[sys]) {
+        Object.keys(universeMap[sys]).forEach(l => lSel.appendChild(new Option(l, l)));
+      }
+      
+      localStorage.setItem('u404_system', sys); // Sauvegarde
+      updatePOIs();
+    }
+
+    function updatePOIs() {
+      const sys = document.getElementById('system').value;
+      const loc = document.getElementById('location').value;
+      const dl = document.getElementById('poi-list');
+      dl.innerHTML = "";
+      
+      if (universeMap[sys] && universeMap[sys][loc]) {
+        universeMap[sys][loc].forEach(p => { 
+          let o = document.createElement("option"); 
+          o.value = p; 
+          dl.appendChild(o); 
+        });
+      }
+      
+      localStorage.setItem('u404_location', loc); // Sauvegarde
+    }
+
+    // INTERACTION MINERAIS
+    function toggleOre(el) {
+      const input = el.querySelector('input');
+      input.checked = !input.checked;
+      el.classList.toggle('selected');
+      updateCounters();
+    }
+
+    function updateCounters() {
+      const countSelected = (gridId) => document.querySelectorAll(`#${gridId} .ore-btn.selected`).length;
+      document.getElementById('count-high').innerText = countSelected('shipHighGrid') || "";
+      document.getElementById('count-std').innerText = countSelected('shipStandardGrid') || "";
+      document.getElementById('count-fps').innerText = countSelected('fpsGrid') || "";
+      document.getElementById('count-salvage').innerText = countSelected('salvageGrid') || "";
+    }
+
+    // SOUMISSION DE PROTOCOLE
+    function submitForm() {
+      const btn = document.getElementById('submitBtn');
+      const selectedInputs = Array.from(document.querySelectorAll('.ore-btn.selected input'));
+      
+      if(selectedInputs.length === 0 && document.getElementById('comment').value.trim() === "") {
+        alert("ALERTE: Impossible d'envoyer un signal vide. Sélectionnez un minerai ou signalez une note.");
+        return;
+      }
+
+      // UX Loading State
+      btn.innerHTML = "<span class='spinner'></span> TRANSMISSION PROTOCOLE..."; 
+      btn.disabled = true;
+      btn.style.background = "#333";
+      
+      const data = {
+        system: document.getElementById('system').value, 
+        location: document.getElementById('location').value,
+        poi: document.getElementById('poi').value, 
+        quality: document.getElementById('quality').value || 0,
+        comment: document.getElementById('comment').value, 
+        ores: selectedInputs.map(i => i.value)
+      };
+
+      // Exécution via l'API REST Web App
+      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "VOTRE_URL_WEB_APP_ICI") {
+        fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          redirect: 'follow', // Suivre la redirection Google
+          body: JSON.stringify({ action: "appendData", data: data }),
+          headers: { "Content-Type": "text/plain;charset=utf-8" }
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.error) throw new Error(response.error);
+          resetForm();
+          showSuccess(btn);
+        })
+        .catch(error => showError(btn, error));
+      } else if (typeof google !== 'undefined' && google.script) {
+        // Fallback pour exécution native (dans l'éditeur Google)
+        google.script.run
+          .withSuccessHandler(() => { resetForm(); showSuccess(btn); })
+          .withFailureHandler(err => showError(btn, err))
+          .appendData(data);
+      } else {
+        // Fallback local (simulation si aucune URL configurée)
+        console.log("Mock data payload:", data);
+        setTimeout(() => { resetForm(); showSuccess(btn); }, 1500);
+      }
+    }
+
+    function resetForm() {
+      document.querySelectorAll('.ore-btn').forEach(el => { 
+        el.classList.remove('selected'); 
+        el.querySelector('input').checked = false; 
+      });
+      document.getElementById('quality').value = '0';
+      document.getElementById('comment').value = '';
+      document.getElementById('poi').value = '';
+      updateCounters();
+    }
+
+    function showSuccess(btn) {
+      btn.innerHTML = "TELEMETRY SYNCHRONIZED"; 
+      btn.style.background = "var(--success)";
+      btn.style.color = "#fff";
+      
+      // Retour à la normale après 2.5s
+      setTimeout(() => { 
+        btn.innerHTML = "TRANSMIT TELEMETRY"; 
+        btn.style.background = "var(--primary)"; 
+        btn.style.color = "#000";
+        btn.disabled = false; 
+      }, 2500);
+    }
+
+    function showError(btn, err) {
+      console.error(err);
+      btn.innerHTML = "TRANSMISSION FAILED (ORBITAL BLOCK)"; 
+      btn.style.background = "var(--error)";
+      btn.style.color = "#fff";
+      
+      setTimeout(() => { 
+        btn.innerHTML = "RETRY TRANSMISSION"; 
+        btn.style.background = "var(--primary)"; 
+        btn.style.color = "#000";
+        btn.disabled = false; 
+      }, 3000);
+    }
+
+    // TELEMETRIE & ANALYTIQUE
+    function loadProbabilities() {
+      const targetSel = document.getElementById('oreTarget');
+      
+      // Auto-remplissage du dropdown s'il est vide
+      if(targetSel.options.length === 0) {
+        const all = [...ores.high, ...ores.std, ...ores.fps, ...ores.salvage].sort();
+        all.forEach(r => targetSel.appendChild(new Option(r, r)));
+      }
+      
+      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "VOTRE_URL_WEB_APP_ICI") {
+        fetch(`${GAS_WEB_APP_URL}?action=getProbabilityStats`)
+          .then(res => res.json())
+          .then(d => { 
+            if(d.error) throw new Error(d.error);
+            probData = d; 
+            displayProbability(); 
+          })
+          .catch(e => {
+            console.error(e);
+            document.getElementById('probResult').innerHTML = "<div class='stat-card' style='border-color:var(--error)'>ERREUR DE RECEPTION.</div>";
+          });
+      } else if (typeof google !== 'undefined' && google.script) {
+        // Fallback natif
+        google.script.run
+          .withSuccessHandler(d => { probData = d; displayProbability(); })
+          .withFailureHandler(e => {
+            document.getElementById('probResult').innerHTML = "<div class='stat-card' style='border-color:var(--error)'>ERREUR DE RECEPTION.</div>";
+          })
+          .getProbabilityStats();
+      } else {
+        // Mock local
+        setTimeout(() => {
+          probData = { matrix: { "GOLD": [{location: "Daymar", probability: "45.2"}, {location: "Lyria", probability: "12.0"}] }, totalScans: 42 };
+          displayProbability();
+        }, 1000);
+      }
+    }
+
+    function displayProbability() {
+      if(!probData) return;
+      
+      const target = document.getElementById('oreTarget').value;
+      const resultDiv = document.getElementById('probResult');
+      
+      if (!probData.matrix) {
+        resultDiv.innerHTML = "<div class='stat-card'>AUCUNE DONNEE ENREGISTREE.</div>"; 
+        return; 
+      }
+      
+      const data = probData.matrix[target] || [];
+      
+      if(data.length === 0) { 
+        resultDiv.innerHTML = "<div class='stat-card'><strong style='color:#666'>AUCUN SCAN POSITIF DETECTE POUR CE MATERIAU.</strong></div>"; 
+        return; 
+      }
+      
+      let html = "";
+      data.slice(0, 8).forEach(o => {
+        html += `
+          <div class='stat-card'>
+            <strong class='stat-loc'>${o.location}</strong>
+            <span class='prob-val'>${o.probability}%</span>
+          </div>`;
+      });
+      resultDiv.innerHTML = html;
+    }
+
+    // INITIALISATION OBLIGATOIRE DU TERMINAL 
+    function startTerminal() {
+      console.log("OS Terminal Booting...");
+      
+      // 1. Génération Automatique des Grilles de l'Interface
+      const pG = (id, items, cls) => {
+        const container = document.getElementById(id);
+        if (!container) return;
+        items.forEach(i => {
+          const div = document.createElement('div');
+          div.className = `ore-btn ${cls}`;
+          div.innerHTML = `<input type="checkbox" value="${i}">${i}`;
+          div.onclick = function() { toggleOre(this); };
+          container.appendChild(div);
+        });
+      };
+      
+      pG('shipHighGrid', ores.high, 'tier-s');
+      pG('shipStandardGrid', ores.std, 'tier-b');
+      pG('fpsGrid', ores.fps, 'tier-fps');
+      pG('salvageGrid', ores.salvage, 'tier-salvage');
+
+      // 2. Initialisation des Sélecteurs Planétaires (Avec Mémoire Locale)
+      const sSel = document.getElementById('system');
+      if (sSel) {
+        Object.keys(universeMap).forEach(s => sSel.appendChild(new Option(s, s)));
+        sSel.onchange = updateLocations;
+        
+        const savedSys = localStorage.getItem('u404_system');
+        sSel.value = savedSys && universeMap[savedSys] ? savedSys : "Stanton";
+        
+        updateLocations();
+        
+        const savedLoc = localStorage.getItem('u404_location');
+        const locSel = document.getElementById('location');
+        if (savedLoc && Array.from(locSel.options).some(o => o.value === savedLoc)) {
+          locSel.value = savedLoc;
+        }
+        
+        document.getElementById('location').onchange = updatePOIs;
+        updatePOIs();
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", startTerminal);
+    } else {
+      startTerminal();
+    }
+  </script>
+</body>
+</html>
