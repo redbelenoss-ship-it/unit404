@@ -339,24 +339,72 @@
     // ⚠️ URL DE VOTRE DEPLOIEMENT WEB APP GOOGLE APPS SCRIPT
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwy-mQyv2i_75YiwgU-C1XlENj_bSYkuSZDpZa0X8q5UhotIy2fOkFYMz8kQU5c3IkT/exec";
 
-    // Dictionnaire des localisations du Verse
+    // Dictionnaire des localisations du Verse (SC 4.0)
     const universeMap = {
       "Stanton": { 
-        "Hurston": ["Lorville", "Everus Harbor", "HDMS-Edmond", "HDMS-Oparei", "Arial", "Aberdeen", "Magda", "Ita"], 
-        "microTech": ["New Babbage", "Port Tressler", "Calliope", "Clio", "Euterpe"], 
-        "Crusader": ["Orison", "Seraphim", "Cellin", "Daymar", "Yela"], 
-        "ArcCorp": ["Area18", "Baijini", "Lyria", "Wala"] 
+        // Stanton I - Hurston + ses lunes
+        "Hurston": [
+          "Lorville", "Everus Harbor",
+          "HDMS-Anderson", "HDMS-Bezdek", "HDMS-Edmond", "HDMS-Hadley",
+          "HDMS-Hahn", "HDMS-Lathan", "HDMS-Norgaard", "HDMS-Oparei",
+          "HDMS-Perlman", "HDMS-Pinewood", "HDMS-Ryder", "HDMS-Stanhope",
+          "HUR-L1 Green Glade", "HUR-L2 Faithful Dream", "HUR-L3 Thundering Express",
+          "HUR-L4 Melodic Fields", "HUR-L5 High Course"
+        ],
+        "Arial (Hurston)": ["HDMS-Bezdek", "HDMS-Lathan"],
+        "Aberdeen (Hurston)": ["HDMS-Anderson", "HDMS-Norgaard"],
+        "Magda (Hurston)": ["HDMS-Perlman", "HDMS-Ryder"],
+        "Ita (Hurston)": ["HDMS-Stanhope", "HDMS-Woodruff"],
+        // Stanton II - Crusader + ses lunes
+        "Crusader": [
+          "Orison", "Seraphim Station",
+          "CRU-L1 Ambitious Dream", "CRU-L4 Shallow Fields", "CRU-L5 Beautiful Glen"
+        ],
+        "Cellin (Crusader)": ["Security Post Kareah", "Gallete Family Farm", "Hickes Research"],
+        "Daymar (Crusader)": ["Benson Mining", "Kudre Ore", "Shubin Mining SCD-1", "ArcCorp Mining 141"],
+        "Yela (Crusader)": ["GrimHEX", "ArcCorp Mining 157"],
+        // Stanton III - ArcCorp + ses lunes
+        "ArcCorp": [
+          "Area18", "Baijini Point",
+          "ARC-L1 Wide Forest", "ARC-L2 Lively Pathway",
+          "ARC-L4 Faint Glen", "ARC-L5 Yellow Core"
+        ],
+        "Lyria (ArcCorp)": ["ArcCorp Mining 045", "ArcCorp Mining 048", "Shubin Mining SAL-2"],
+        "Wala (ArcCorp)": ["ArcCorp Mining 056", "ArcCorp Mining 061", "Samson & Sons"],
+        // Stanton IV - microTech + ses lunes
+        "microTech": [
+          "New Babbage", "Port Tressler",
+          "MIC-L1 Shallow Frontier", "MIC-L2 Long Forest",
+          "MIC-L4 Red Crossroads", "MIC-L5 Modern Icarus"
+        ],
+        "Calliope (microTech)": ["NT-999-XIX", "NT-999-XXII"],
+        "Clio (microTech)": ["NT-999-XVI"],
+        "Euterpe (microTech)": ["NT-999-XXXV"]
       },
-      "Pyro": { 
-        "Pyro I": ["Lazarus", "RMB-BALM"], 
-        "Pyro II": ["Monox", "Ostler's Claim", "Rustville"], 
-        "Pyro III": ["Bloom", "Bueno Ravine"], 
+      "Pyro": {
+        // Pyro I - planète volcanique
+        "Pyro I": ["Checkmate Station (L4)"],
+        // Pyro II - Monox (planète désertique)
+        "Monox (Pyro II)": ["Orbituary", "Rustville", "Stanton Gateway Station"],
+        // Pyro III - Bloom (planète glaciaire)
+        "Bloom (Pyro III)": ["Orbituary Station"],
+        // Pyro IV - proto-planète
         "Pyro IV": [],
-        "Pyro V": ["Fairo", "Fed Canyon Outpost"] 
+        // Pyro V - géante gazeuse et ses 6 lunes
+        "Pyro V": [],
+        "Adir (Pyro V-A)": [],
+        "Ignis (Pyro V-B)": [],
+        "Fairo (Pyro V-C)": ["Fed Canyon Outpost"],
+        "Fuego (Pyro V-D)": [],
+        "Vatra (Pyro V-E)": [],
+        "Vuur (Pyro V-F)": [],
+        // Pyro VI - Terminus
+        "Terminus (Pyro VI)": ["Ruin Station"]
       },
-      "Nyx": { 
-        "Delamar": ["Levski"], 
-        "Glaciem Ring": ["Breaker Alpha"] 
+      "Nyx": {
+        // Nyx - système minier illégal
+        "Delamar": ["Levski"],
+        "Glaciem Ring": ["Breaker Alpha", "Novaloch"]
       }
     };
 
