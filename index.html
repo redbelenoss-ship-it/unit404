@@ -734,6 +734,7 @@
       </div>
 
       <div class="header-status">
+        <div class="status-badge" id="totalRecordsBadge"><span class="status-dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></span>RECORDS: <span id="globalRecordCount">...</span></div>
         <div class="status-badge"><span class="status-dot"></span>SYSTEMS ONLINE</div>
         <div class="status-badge" id="dateDisplay" style="color:#1e3050"></div>
         <div class="status-badge" style="color:#1e3050">SC VER // 4.0.1</div>
@@ -752,6 +753,11 @@
       <!-- ─── TAB: ACQUISITION ─── -->
       <div id="terminal" class="tab-content active">
         <form id="miningForm" onsubmit="return false;">
+
+          <div class="form-group form-full" style="margin-bottom:16px;">
+            <label class="form-label">OPERATOR</label>
+            <input type="text" id="operator" placeholder="Enter operative callsign..." style="border-left-color:var(--orange);">
+          </div>
 
           <div class="form-row">
             <div class="form-group">
@@ -1004,6 +1010,7 @@
       btn.classList.remove('success', 'error');
 
       const data = {
+        operator: document.getElementById('operator').value || "Unknown",
         system:   document.getElementById('system').value,
         location: document.getElementById('location').value,
         poi:      document.getElementById('poi').value,
@@ -1012,11 +1019,15 @@
         ores:     selected.map(i => i.value)
       };
 
+      // Sauvegarde de l'opérateur
+      localStorage.setItem('u404_op', data.operator);
+
       const doSuccess = () => {
         resetForm();
         btn.textContent = '✓  TELEMETRY SYNCHRONIZED';
         btn.classList.add('success');
         btn.disabled = false;
+        loadProbabilities(); // Rafraîchir le compteur
         setTimeout(() => { btn.textContent = 'TRANSMIT TELEMETRY'; btn.classList.remove('success'); }, 2800);
       };
 
@@ -1074,13 +1085,24 @@
       if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== 'VOTRE_URL_WEB_APP_ICI') {
         fetch(`${GAS_WEB_APP_URL}?action=getProbabilityStats`)
           .then(r => r.json())
-          .then(d => { if (d.error) throw new Error(d.error); probData = d; displayProbability(); })
+          .then(d => { 
+            if (d.error) throw new Error(d.error); 
+            probData = d; 
+            if (d.totalScans !== undefined) {
+              document.getElementById('globalRecordCount').textContent = d.totalScans;
+            }
+            displayProbability(); 
+          })
           .catch(() => {
             document.getElementById('probResult').innerHTML = '<div class="stat-card" style="border-left-color:var(--error);color:var(--error)">DATABANK UNREACHABLE</div>';
           });
       } else if (typeof google !== 'undefined' && google.script) {
         google.script.run
-          .withSuccessHandler(d => { probData = d; displayProbability(); })
+          .withSuccessHandler(d => { 
+            probData = d; 
+            if (d.totalScans !== undefined) document.getElementById('globalRecordCount').textContent = d.totalScans;
+            displayProbability(); 
+          })
           .withFailureHandler(() => {
             document.getElementById('probResult').innerHTML = '<div class="stat-card" style="border-left-color:var(--error);color:var(--error)">DATABANK UNREACHABLE</div>';
           })
@@ -1088,6 +1110,7 @@
       } else {
         setTimeout(() => {
           probData = { matrix: { "GOLD": [{location:"Daymar",probability:"62.5"},{location:"Lyria",probability:"38.0"},{location:"Wala",probability:"22.1"}] }, totalScans: 7 };
+          document.getElementById('globalRecordCount').textContent = probData.totalScans;
           displayProbability();
         }, 800);
       }
@@ -1160,6 +1183,13 @@
       }
       locSel.onchange = updatePOIs;
       updatePOIs();
+
+      // Restauration de l'opérateur
+      const savedOp = localStorage.getItem('u404_op');
+      if (savedOp) document.getElementById('operator').value = savedOp;
+
+      // Chargement initial des statistiques et du compteur
+      loadProbabilities();
 
       updateCounters();
       console.log('[UNIT 404] Terminal online.');
