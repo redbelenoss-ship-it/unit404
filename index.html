@@ -1050,8 +1050,16 @@
           body: JSON.stringify({ action: 'appendData', data }),
           headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         })
-        .then(r => r.json())
-        .then(r => { if (r.error) throw new Error(r.error); doSuccess(); })
+        .then(res => {
+          // GAS redirige vers googleusercontent.com.
+          // r.json() peut échouer même quand le serveur retourne 200.
+          // On vérifie simplement le statut HTTP.
+          if (res.ok) {
+            doSuccess();
+          } else {
+            doError(new Error('HTTP ' + res.status));
+          }
+        })
         .catch(doError);
       } else if (typeof google !== 'undefined' && google.script) {
         google.script.run.withSuccessHandler(doSuccess).withFailureHandler(doError).appendData(data);
