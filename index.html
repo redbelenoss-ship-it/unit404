@@ -1,348 +1,860 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNIT 404 - Mining Terminal</title>
+  <meta name="description" content="UNIT 404 Mining Intelligence Terminal - Star Citizen ore tracking and probability analytics">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { 
-      --primary: #ff8c00; 
-      --primary-hover: #ffa500;
-      --secondary: #ffd700; 
-      --bg: #050505; 
-      --panel: #0a0a0c; 
-      --cyan: #00ffff; 
-      --hazard: repeating-linear-gradient(45deg, #ffd700, #ffd700 10px, #111 10px, #111 20px); 
-      --success: #2ea043;
-      --error: #f85149;
-    }
-    
-    body { 
-      margin: 0; 
-      padding: 15px; 
-      background: var(--bg); 
-      color: #eaeaea; 
-      font-family: 'Rajdhani', sans-serif; 
-    }
-    
-    /* En-tête industrielle dynamique */
-    .industrial-header {
-      position: relative; 
-      margin-bottom: 25px; 
-      padding: 35px 10px;
-      background: #111; 
-      border: 2px solid var(--primary);
-      clip-path: polygon(0 0, 100% 0, 100% 80%, 95% 100%, 5% 100%, 0 80%);
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    
-    .industrial-header:hover {
-      box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
-    }
-    
-    .header-title { 
-      font-size: 3.5em; 
-      font-weight: 900; 
-      color: var(--primary); 
-      margin: 0; 
-      text-shadow: 0 0 15px rgba(255,140,0,0.5); 
-      font-family: 'Share Tech Mono', monospace; 
-      letter-spacing: 2px;
-    }
-    
-    .container { 
-      max-width: 900px; 
-      margin: auto; 
-      background: var(--panel); 
-      padding: 25px; 
-      border: 1px solid #333; 
-      position: relative; 
-      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-    }
-    
-    .container::before { 
-      content: ""; 
-      position: absolute; 
-      top: -4px; right: 0; left: 0; 
-      height: 4px; 
-      background: var(--hazard); 
+    :root {
+      --bg:       #020408;
+      --panel:    #080d14;
+      --panel2:   #0c1420;
+      --border:   #1a2a40;
+      --blue:     #00aaff;
+      --blue-dim: #0066aa;
+      --blue-glow:#004488;
+      --silver:   #b0bec5;
+      --silver-hi:#e8ecef;
+      --orange:   #ff8c00;
+      --orange-hi:#ffaa33;
+      --cyan:     #00e5ff;
+      --success:  #00e676;
+      --error:    #ff1744;
+      --gold:     #ffd700;
+
+      --font-ui: 'Rajdhani', sans-serif;
+      --font-mono: 'Share Tech Mono', monospace;
+      --font-title: 'Orbitron', sans-serif;
     }
 
-    /* Onglets de navigation */
-    .tabs { 
-      display: flex; 
-      gap: 4px; 
-      margin-bottom: 20px; 
-    }
-    
-    .tab-btn { 
-      background: #111; 
-      color: #666; 
-      border: 1px solid #333; 
-      padding: 14px; 
-      cursor: pointer; 
-      font-family: 'Rajdhani', sans-serif; 
-      font-weight: 700; 
-      text-transform: uppercase; 
-      flex: 1; 
-      transition: all 0.2s ease;
-      letter-spacing: 1px;
-    }
-    
-    .tab-btn:hover:not(.active) {
-      background: #1a1a1a;
-      color: #aaa;
-    }
-    
-    .tab-btn.active { 
-      background: var(--primary); 
-      color: #000; 
-      border-color: var(--primary); 
-      box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--silver);
+      font-family: var(--font-ui);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; } 
-    .tab-content.active { display: block; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* ══════════════════════════════════════════
+       CIRCUIT BOARD BACKGROUND
+    ══════════════════════════════════════════ */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,170,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,170,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .section-title { 
-      background: #1a1a1a; 
-      border-left: 5px solid var(--primary); 
-      padding: 10px 15px; 
-      margin: 30px 0 15px 0; 
-      text-transform: uppercase; 
-      color: var(--cyan); 
-      font-weight: 700; 
-      letter-spacing: 1px;
+    body::after {
+      content: "";
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,100,200,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ══════════════════════════════════════════
+       PAGE LAYOUT
+    ══════════════════════════════════════════ */
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    /* ══════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════ */
+    .site-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-    
-    label { 
-      font-weight: 700; 
-      margin-top: 15px; 
-      display: block; 
-      color: var(--secondary); 
-      text-transform: uppercase; 
-      font-size: 0.9em;
-      letter-spacing: 1px;
-    }
-    
-    select, input, textarea { 
-      width: 100%; 
-      padding: 12px; 
-      margin-top: 5px; 
-      background: #080808; 
-      color: #fff; 
-      border: 1px solid #333; 
-      font-family: 'Rajdhani', sans-serif; 
-      font-size: 1.1em;
-      box-sizing: border-box; 
-      transition: border-color 0.2s ease;
-    }
-    
-    select:focus, input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--cyan);
-    }
-
-    /* Grilles et Boutons Minerais */
-    .grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-      gap: 10px; 
-      margin-top: 10px; 
-    }
-    
-    .ore-btn { 
-      background: #0d0d0d; 
-      border: 1px solid #222; 
-      color: #666; 
-      padding: 12px 5px; 
-      text-align: center; 
-      cursor: pointer; 
-      font-size: 0.9em; 
-      font-weight: 700; 
-      text-transform: uppercase; 
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
-      user-select: none;
-      border-radius: 2px;
-    }
-    
-    .ore-btn:hover {
-      border-color: #555;
-      color: #aaa;
-    }
-    
-    .ore-btn input { display: none; }
-    
-    .ore-btn.selected { 
-      border-color: #fff; 
-      box-shadow: 0 0 10px rgba(255,255,255,0.1); 
-      transform: scale(1.02);
-    }
-    
-    .tier-s.selected { background: #ff4500; color: #fff; }
-    .tier-b.selected { background: var(--secondary); color: #000; }
-    .tier-fps.selected { background: var(--cyan); color: #000; }
-    .tier-salvage.selected { background: #8a2be2; color: #fff; }
-
-    /* Bouton d'action principal */
-    .btn { 
-      background: var(--primary); 
-      color: #000; 
-      padding: 22px; 
-      border: none; 
-      cursor: pointer; 
-      width: 100%; 
-      font-weight: 900; 
-      font-size: 22px; 
-      margin-top: 35px; 
-      text-transform: uppercase; 
-      transition: all 0.2s ease;
-      letter-spacing: 2px;
+      gap: 28px;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, #060c14 0%, #0a141e 100%);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--blue);
       position: relative;
       overflow: hidden;
     }
-    
-    .btn:hover {
-      background: var(--primary-hover);
-      box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
-    }
-    
-    .btn:disabled {
-      background: #333;
-      color: #888;
-      cursor: not-allowed;
-      box-shadow: none;
+
+    .site-header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue), var(--cyan), var(--blue), transparent);
+      animation: headerScan 4s ease-in-out infinite;
     }
 
-    /* Cartes Analytics */
-    .stat-card { 
-      background: #111; 
-      border-right: 4px solid var(--cyan); 
-      padding: 20px; 
-      margin-bottom: 12px;
+    @keyframes headerScan {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* Corner decorations */
+    .site-header::after {
+      content: "";
+      position: absolute;
+      bottom: 12px; right: 20px;
+      width: 60px; height: 60px;
+      border-right: 1px solid rgba(0,170,255,0.2);
+      border-bottom: 1px solid rgba(0,170,255,0.2);
+    }
+
+    /* Logo container */
+    .header-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 2px solid var(--blue-dim);
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow:
+        0 0 0 1px rgba(0,170,255,0.1),
+        0 0 20px rgba(0,170,255,0.2),
+        inset 0 0 20px rgba(0,0,0,0.5);
+      animation: logoGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 0 1px rgba(0,170,255,0.1), 0 0 20px rgba(0,170,255,0.2), inset 0 0 20px rgba(0,0,0,0.5); }
+      50% { box-shadow: 0 0 0 1px rgba(0,170,255,0.3), 0 0 35px rgba(0,170,255,0.4), inset 0 0 20px rgba(0,0,0,0.5); }
+    }
+
+    .header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Text block */
+    .header-text { flex: 1; }
+
+    .header-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7em;
+      color: var(--blue);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    .header-title {
+      font-family: var(--font-title);
+      font-size: 2.8em;
+      font-weight: 900;
+      color: var(--silver-hi);
+      letter-spacing: 4px;
+      line-height: 1;
+      text-shadow: 0 0 30px rgba(0,170,255,0.4), 0 0 60px rgba(0,170,255,0.15);
+    }
+
+    .header-sub {
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72em;
+      color: var(--blue-dim);
+      letter-spacing: 2px;
+    }
+
+    /* Status indicators */
+    .header-status {
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      display: flex;
       align-items: center;
-      transition: transform 0.2s ease;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.68em;
+      color: var(--silver);
+      letter-spacing: 1px;
     }
-    
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ══════════════════════════════════════════
+       PANEL / CONTAINER
+    ══════════════════════════════════════════ */
+    .terminal-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    /* Top hazard stripe */
+    .terminal-panel::before {
+      content: "";
+      display: block;
+      height: 3px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--blue) 0px, var(--blue) 8px,
+        transparent 8px, transparent 16px
+      );
+      opacity: 0.5;
+    }
+
+    /* Corner notch */
+    .terminal-panel::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 20px 20px 0;
+      border-color: transparent var(--bg) transparent transparent;
+    }
+
+    /* ══════════════════════════════════════════
+       TABS
+    ══════════════════════════════════════════ */
+    .tabs-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: #3a5070;
+      border: none;
+      border-right: 1px solid var(--border);
+      padding: 16px 28px;
+      cursor: pointer;
+      font-family: var(--font-title);
+      font-size: 0.7em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .tab-btn::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--blue);
+      transform: scaleX(0);
+      transition: transform 0.25s ease;
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(0,170,255,0.04);
+      color: var(--silver);
+    }
+
+    .tab-btn.active {
+      color: var(--blue);
+      background: rgba(0,170,255,0.06);
+    }
+
+    .tab-btn.active::after {
+      transform: scaleX(1);
+    }
+
+    /* ══════════════════════════════════════════
+       PANEL CONTENT
+    ══════════════════════════════════════════ */
+    .tab-content { display: none; padding: 28px; }
+    .tab-content.active {
+      display: block;
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════════════
+       FORM ELEMENTS
+    ══════════════════════════════════════════ */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .form-label {
+      font-family: var(--font-mono);
+      font-size: 0.68em;
+      color: var(--blue-dim);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-label::before {
+      content: "//";
+      color: rgba(0,170,255,0.3);
+    }
+
+    select, input[type="text"], input[type="number"], input:not([type]), textarea {
+      background: var(--panel2);
+      color: var(--silver-hi);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--blue-glow);
+      padding: 11px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+      width: 100%;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--blue);
+      border-left-color: var(--blue);
+      box-shadow: 0 0 0 1px rgba(0,170,255,0.15), inset 0 0 12px rgba(0,170,255,0.03);
+    }
+
+    select option { background: var(--panel2); }
+
+    /* ══════════════════════════════════════════
+       SECTION TITLES
+    ══════════════════════════════════════════ */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 30px 0 14px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-title);
+      font-size: 0.65em;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--silver);
+    }
+
+    .section-title::before {
+      content: "";
+      display: block;
+      width: 3px;
+      height: 14px;
+      background: linear-gradient(180deg, var(--blue), transparent);
+    }
+
+    .section-count {
+      font-family: var(--font-mono);
+      font-size: 0.65em;
+      color: var(--blue);
+      background: rgba(0,170,255,0.08);
+      border: 1px solid rgba(0,170,255,0.2);
+      padding: 2px 10px;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      margin-left: 12px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* ══════════════════════════════════════════
+       ORE GRID & BUTTONS
+    ══════════════════════════════════════════ */
+    .ore-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 8px;
+    }
+
+    .ore-btn {
+      background: rgba(5, 10, 18, 0.8);
+      border: 1px solid #1a2030;
+      color: #3a5070;
+      padding: 10px 6px 9px;
+      text-align: center;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.72em;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ore-btn input { display: none; }
+
+    .ore-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,170,255,0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .ore-btn:hover {
+      border-color: #2a3a54;
+      color: var(--silver);
+    }
+
+    .ore-btn:hover::before { opacity: 1; }
+
+    .ore-btn.selected {
+      color: #fff;
+      transform: scale(1.02);
+      z-index: 1;
+    }
+
+    /* S-tier: orange (Quantanium, etc.) */
+    .tier-s.selected {
+      background: linear-gradient(135deg, #1a0800, #2a1000);
+      border-color: var(--orange);
+      color: var(--orange-hi);
+      box-shadow: 0 0 12px rgba(255,140,0,0.25), inset 0 0 8px rgba(255,140,0,0.06);
+    }
+
+    /* Standard: blue/silver */
+    .tier-b.selected {
+      background: linear-gradient(135deg, #00080e, #001422);
+      border-color: var(--blue);
+      color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,170,255,0.25), inset 0 0 8px rgba(0,170,255,0.06);
+    }
+
+    /* FPS: teal/green */
+    .tier-fps.selected {
+      background: linear-gradient(135deg, #001410, #002818);
+      border-color: #00e5a0;
+      color: #00e5a0;
+      box-shadow: 0 0 12px rgba(0,229,160,0.25), inset 0 0 8px rgba(0,229,160,0.06);
+    }
+
+    /* Salvage: purple */
+    .tier-salvage.selected {
+      background: linear-gradient(135deg, #0a0010, #160028);
+      border-color: #aa44ff;
+      color: #cc88ff;
+      box-shadow: 0 0 12px rgba(170,68,255,0.25), inset 0 0 8px rgba(170,68,255,0.06);
+    }
+
+    /* ══════════════════════════════════════════
+       SUBMIT BUTTON
+    ══════════════════════════════════════════ */
+    .submit-btn {
+      width: 100%;
+      margin-top: 32px;
+      padding: 20px 32px;
+      background: linear-gradient(135deg, #001a30 0%, #002244 50%, #001a30 100%);
+      border: 1px solid var(--blue-dim);
+      border-top: 2px solid var(--blue);
+      color: var(--blue);
+      font-family: var(--font-title);
+      font-size: 0.85em;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,170,255,0) 0%, rgba(0,170,255,0.08) 50%, rgba(0,170,255,0) 100%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,170,255,0.2), 0 0 40px rgba(0,170,255,0.08);
+    }
+
+    .submit-btn:hover:not(:disabled)::before { opacity: 1; }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* State classes */
+    .submit-btn.success {
+      border-color: var(--success);
+      color: var(--success);
+      box-shadow: 0 0 20px rgba(0,230,118,0.2);
+    }
+
+    .submit-btn.error {
+      border-color: var(--error);
+      color: var(--error);
+      box-shadow: 0 0 20px rgba(255,23,68,0.2);
+    }
+
+    /* ══════════════════════════════════════════
+       ANALYTICS
+    ══════════════════════════════════════════ */
+    .analytics-grid {
+      display: grid;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--blue-glow);
+      padding: 16px 20px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0,170,255,0.04) 0%, transparent 60%);
+    }
+
     .stat-card:hover {
-      transform: translateX(5px);
-      background: #151515;
+      border-left-color: var(--blue);
+      transform: translateX(4px);
+      box-shadow: -3px 0 12px rgba(0,170,255,0.15);
     }
-    
+
+    .stat-rank {
+      font-family: var(--font-mono);
+      font-size: 0.65em;
+      color: #2a4060;
+      min-width: 24px;
+    }
+
     .stat-loc {
-      font-size: 1.2em;
+      flex: 1;
+      padding: 0 16px;
+      font-family: var(--font-ui);
+      font-weight: 600;
+      font-size: 1.05em;
+      color: var(--silver-hi);
     }
-    
-    .prob-val { 
-      color: var(--cyan); 
-      font-size: 2em; 
-      font-weight: 900; 
-      font-family: 'Share Tech Mono', monospace;
+
+    .stat-system {
+      font-size: 0.7em;
+      color: var(--silver);
+      font-weight: 400;
     }
-    
-    /* Animations de chargement */
+
+    .prob-val {
+      font-family: var(--font-mono);
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 12px rgba(0,229,255,0.4);
+    }
+
+    .prob-bar-wrap {
+      width: 80px;
+      height: 4px;
+      background: var(--border);
+      margin-left: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue-glow), var(--cyan));
+      box-shadow: 0 0 6px var(--cyan);
+      transition: width 0.5s ease;
+    }
+
+    /* Loading */
+    .loading-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 30px 0;
+      font-family: var(--font-mono);
+      font-size: 0.8em;
+      color: var(--blue-dim);
+      letter-spacing: 2px;
+    }
+
+    .loading-text::before {
+      content: "";
+      display: block;
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--blue-glow);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Spinner in button */
     .spinner {
       display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0,0,0,0.3);
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
       border-radius: 50%;
-      border-top-color: #000;
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 10px;
+      animation: spin 0.8s linear infinite;
       vertical-align: middle;
+      margin-right: 8px;
     }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    /* ══════════════════════════════════════════
+       POI FULL-WIDTH
+    ══════════════════════════════════════════ */
+    .form-full { margin-bottom: 0; }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    .site-footer {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border: 1px solid rgba(26,42,64,0.5);
+      font-family: var(--font-mono);
+      font-size: 0.62em;
+      color: #1e3050;
+      letter-spacing: 2px;
     }
-    
-    .loading-text {
-      color: var(--cyan);
-      text-align: center;
-      padding: 20px;
-      font-size: 1.2em;
-      font-style: italic;
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .site-header { flex-wrap: wrap; gap: 16px; padding: 20px; }
+      .header-title { font-size: 2em; }
+      .header-status { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      .tab-btn { padding: 14px 16px; font-size: 0.6em; letter-spacing: 2px; }
+      .ore-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
   </style>
 </head>
 <body>
 
-  <div class="industrial-header">
-    <div class="header-title">UNIT 404</div>
-  </div>
-
-  <div class="container">
-    <div class="tabs">
-      <button class="tab-btn active" id="btn-terminal" onclick="switchTab('terminal')">Acquisition</button>
-      <button class="tab-btn" id="btn-analytics" onclick="switchTab('analytics')">Analytics</button>
-    </div>
-
-    <!-- ONGLETS: TERMINAL D'ACQUISITION -->
-    <div id="terminal" class="tab-content active">
-      <form id="miningForm">
-        <label>System</label>
-        <select id="system"></select>
-        
-        <label>Sector / Body</label>
-        <select id="location"></select>
-        
-        <label>POI / Coordinates</label>
-        <input list="poi-list" id="poi" placeholder="Sélectionnez ou tapez vos coordonnées...">
-        <datalist id="poi-list"></datalist>
-        
-        <div class="section-title">Ship Mining (A/S) <span id="count-high" style="font-size:0.6em; color:#fff"></span></div>
-        <div class="grid" id="shipHighGrid"></div>
-        
-        <div class="section-title">Ship Mining (Standard) <span id="count-std" style="font-size:0.6em; color:#fff"></span></div>
-        <div class="grid" id="shipStandardGrid"></div>
-        
-        <div class="section-title">FPS & Vehicle Extraction <span id="count-fps" style="font-size:0.6em; color:#fff"></span></div>
-        <div class="grid" id="fpsGrid"></div>
-        
-        <div class="section-title">Salvage <span id="count-salvage" style="font-size:0.6em; color:#fff"></span></div>
-        <div class="grid" id="salvageGrid"></div>
-        
-        <label>Purity scanner / SCU Amount</label>
-        <input type="number" id="quality" value="0" min="0">
-        
-        <label>Intelligence Logs</label>
-        <textarea id="comment" rows="3" placeholder="Observations et logs additionnels..."></textarea>
-        
-        <button type="button" class="btn" id="submitBtn" onclick="submitForm()">TRANSMIT TELEMETRY</button>
-      </form>
-    </div>
-
-    <!-- ONGLETS: ANALYTIQUE DE PROBABILITES -->
-    <div id="analytics" class="tab-content">
-      <div class="section-title">Probability Model</div>
-      <label>Target Resource</label>
-      <select id="oreTarget" onchange="displayProbability()"></select>
-      
-      <div id="probResult" style="margin-top:20px;">
-        <div class="loading-text">Awaiting telemetry...</div>
+  <!-- ╔═══════════════════════════════════╗ -->
+  <!-- ║           SITE HEADER            ║ -->
+  <!-- ╚═══════════════════════════════════╝ -->
+  <div class="page-wrapper">
+    <header class="site-header">
+      <div class="header-logo" id="logoRing">
+        <!-- Le logo sera injecté ici si disponible, sinon SVG fallback -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;background:#050a12">
+          <!-- Circuit board pattern SVG -->
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#0a1e30" stroke-width="6"/>
+          <circle cx="50" cy="50" r="38" fill="none" stroke="#06141e" stroke-width="1"/>
+          <!-- PCB lines -->
+          <line x1="50" y1="4" x2="50" y2="30" stroke="#1a3a5a" stroke-width="1.5"/>
+          <line x1="50" y1="70" x2="50" y2="96" stroke="#1a3a5a" stroke-width="1.5"/>
+          <line x1="4" y1="50" x2="30" y2="50" stroke="#1a3a5a" stroke-width="1.5"/>
+          <line x1="70" y1="50" x2="96" y2="50" stroke="#1a3a5a" stroke-width="1.5"/>
+          <line x1="19" y1="19" x2="35" y2="35" stroke="#1a3a5a" stroke-width="1"/>
+          <line x1="81" y1="19" x2="65" y2="35" stroke="#1a3a5a" stroke-width="1"/>
+          <line x1="19" y1="81" x2="35" y2="65" stroke="#1a3a5a" stroke-width="1"/>
+          <line x1="81" y1="81" x2="65" y2="65" stroke="#1a3a5a" stroke-width="1"/>
+          <!-- Nodes -->
+          <circle cx="50" cy="20" r="3" fill="#003860" stroke="#00aaff" stroke-width="1"/>
+          <circle cx="50" cy="80" r="3" fill="#003860" stroke="#00aaff" stroke-width="1"/>
+          <circle cx="20" cy="50" r="3" fill="#003860" stroke="#00aaff" stroke-width="1"/>
+          <circle cx="80" cy="50" r="3" fill="#003860" stroke="#00aaff" stroke-width="1"/>
+          <!-- Center glow -->
+          <circle cx="50" cy="50" r="6" fill="#003060" stroke="#00aaff" stroke-width="1.5"/>
+          <circle cx="50" cy="50" r="3" fill="#00aaff" opacity="0.8"/>
+          <!-- 404 text -->
+          <text x="50" y="47" font-family="'Orbitron',monospace" font-size="16" font-weight="900" fill="#c8d8e8" text-anchor="middle" letter-spacing="1">404</text>
+          <text x="50" y="60" font-family="'Orbitron',monospace" font-size="6" fill="#4488aa" text-anchor="middle" letter-spacing="3">UNIT</text>
+        </svg>
       </div>
-    </div>
+
+      <div class="header-text">
+        <div class="header-eyebrow">// MINING INTELLIGENCE SYSTEM</div>
+        <div class="header-title">UNIT 404</div>
+        <div class="header-sub">TELEMETRY ACQUISITION & PROBABILITY ANALYTICS</div>
+      </div>
+
+      <div class="header-status">
+        <div class="status-badge"><span class="status-dot"></span>SYSTEMS ONLINE</div>
+        <div class="status-badge" id="dateDisplay" style="color:#1e3050"></div>
+        <div class="status-badge" style="color:#1e3050">SC VER // 4.0.1</div>
+      </div>
+    </header>
+
+    <!-- ╔═══════════════════════════════════╗ -->
+    <!-- ║         TERMINAL PANEL           ║ -->
+    <!-- ╚═══════════════════════════════════╝ -->
+    <main class="terminal-panel">
+      <nav class="tabs-bar">
+        <button class="tab-btn active" id="btn-terminal" onclick="switchTab('terminal')">[ ACQUISITION ]</button>
+        <button class="tab-btn" id="btn-analytics" onclick="switchTab('analytics')">[ ANALYTICS ]</button>
+      </nav>
+
+      <!-- ─── TAB: ACQUISITION ─── -->
+      <div id="terminal" class="tab-content active">
+        <form id="miningForm" onsubmit="return false;">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">SYSTEM</label>
+              <select id="system"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">SECTOR / BODY</label>
+              <select id="location"></select>
+            </div>
+          </div>
+
+          <div class="form-group form-full">
+            <label class="form-label">POI / COORDINATES</label>
+            <input list="poi-list" id="poi" placeholder="Select or enter coordinates...">
+            <datalist id="poi-list"></datalist>
+          </div>
+
+          <!-- Ore sections -->
+          <div class="section-header">
+            <div class="section-title">SHIP MINING — A/S TIER</div>
+            <span class="section-count" id="count-high">0</span>
+            <div class="section-line"></div>
+          </div>
+          <div class="ore-grid" id="shipHighGrid"></div>
+
+          <div class="section-header">
+            <div class="section-title">SHIP MINING — STANDARD</div>
+            <span class="section-count" id="count-std">0</span>
+            <div class="section-line"></div>
+          </div>
+          <div class="ore-grid" id="shipStandardGrid"></div>
+
+          <div class="section-header">
+            <div class="section-title">FPS &amp; VEHICLE EXTRACTION</div>
+            <span class="section-count" id="count-fps">0</span>
+            <div class="section-line"></div>
+          </div>
+          <div class="ore-grid" id="fpsGrid"></div>
+
+          <div class="section-header">
+            <div class="section-title">SALVAGE</div>
+            <span class="section-count" id="count-salvage">0</span>
+            <div class="section-line"></div>
+          </div>
+          <div class="ore-grid" id="salvageGrid"></div>
+
+          <div style="margin-top:28px;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">PURITY SCANNER / SCU</label>
+                <input type="number" id="quality" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">INTELLIGENCE LOGS</label>
+                <textarea id="comment" rows="2" placeholder="Additional observations..." style="resize:vertical;height:46px;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="submit-btn" id="submitBtn" onclick="submitForm()">
+            TRANSMIT TELEMETRY
+          </button>
+
+        </form>
+      </div>
+
+      <!-- ─── TAB: ANALYTICS ─── -->
+      <div id="analytics" class="tab-content">
+        <div class="form-group" style="max-width:380px;">
+          <label class="form-label">TARGET RESOURCE</label>
+          <select id="oreTarget" onchange="displayProbability()"></select>
+        </div>
+
+        <div class="section-header" style="margin-top:24px;">
+          <div class="section-title">PROBABILITY MODEL — TOP LOCATIONS</div>
+          <div class="section-line"></div>
+        </div>
+
+        <div id="probResult" class="analytics-grid">
+          <div class="loading-text">AWAITING TELEMETRY INPUT</div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <span>UNIT 404 // MINING INTELLIGENCE SYSTEM</span>
+      <span>STAR CITIZEN v4.0</span>
+    </footer>
   </div>
 
+  <!-- ══════════════════════════════════════════════════ -->
+  <!--                      SCRIPT                      -->
+  <!-- ══════════════════════════════════════════════════ -->
   <script>
     // ⚠️ URL DE VOTRE DEPLOIEMENT WEB APP GOOGLE APPS SCRIPT
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwy-mQyv2i_75YiwgU-C1XlENj_bSYkuSZDpZa0X8q5UhotIy2fOkFYMz8kQU5c3IkT/exec";
 
-    // Dictionnaire des localisations du Verse (SC 4.0)
+    // ──────────────────────────────────────────
+    // UNIVERSE MAP (SC 4.0)
+    // ──────────────────────────────────────────
     const universeMap = {
-      "Stanton": { 
-        // Stanton I - Hurston + ses lunes
+      "Stanton": {
         "Hurston": [
           "Lorville", "Everus Harbor",
           "HDMS-Anderson", "HDMS-Bezdek", "HDMS-Edmond", "HDMS-Hadley",
@@ -355,7 +867,6 @@
         "Aberdeen (Hurston)": ["HDMS-Anderson", "HDMS-Norgaard"],
         "Magda (Hurston)": ["HDMS-Perlman", "HDMS-Ryder"],
         "Ita (Hurston)": ["HDMS-Stanhope", "HDMS-Woodruff"],
-        // Stanton II - Crusader + ses lunes
         "Crusader": [
           "Orison", "Seraphim Station",
           "CRU-L1 Ambitious Dream", "CRU-L4 Shallow Fields", "CRU-L5 Beautiful Glen"
@@ -363,7 +874,6 @@
         "Cellin (Crusader)": ["Security Post Kareah", "Gallete Family Farm", "Hickes Research"],
         "Daymar (Crusader)": ["Benson Mining", "Kudre Ore", "Shubin Mining SCD-1", "ArcCorp Mining 141"],
         "Yela (Crusader)": ["GrimHEX", "ArcCorp Mining 157"],
-        // Stanton III - ArcCorp + ses lunes
         "ArcCorp": [
           "Area18", "Baijini Point",
           "ARC-L1 Wide Forest", "ARC-L2 Lively Pathway",
@@ -371,7 +881,6 @@
         ],
         "Lyria (ArcCorp)": ["ArcCorp Mining 045", "ArcCorp Mining 048", "Shubin Mining SAL-2"],
         "Wala (ArcCorp)": ["ArcCorp Mining 056", "ArcCorp Mining 061", "Samson & Sons"],
-        // Stanton IV - microTech + ses lunes
         "microTech": [
           "New Babbage", "Port Tressler",
           "MIC-L1 Shallow Frontier", "MIC-L2 Long Forest",
@@ -382,15 +891,10 @@
         "Euterpe (microTech)": ["NT-999-XXXV"]
       },
       "Pyro": {
-        // Pyro I - planète volcanique
         "Pyro I": ["Checkmate Station (L4)"],
-        // Pyro II - Monox (planète désertique)
         "Monox (Pyro II)": ["Orbituary", "Rustville", "Stanton Gateway Station"],
-        // Pyro III - Bloom (planète glaciaire)
         "Bloom (Pyro III)": ["Orbituary Station"],
-        // Pyro IV - proto-planète
         "Pyro IV": [],
-        // Pyro V - géante gazeuse et ses 6 lunes
         "Pyro V": [],
         "Adir (Pyro V-A)": [],
         "Ignis (Pyro V-B)": [],
@@ -398,50 +902,64 @@
         "Fuego (Pyro V-D)": [],
         "Vatra (Pyro V-E)": [],
         "Vuur (Pyro V-F)": [],
-        // Pyro VI - Terminus
         "Terminus (Pyro VI)": ["Ruin Station"]
       },
       "Nyx": {
-        // Nyx - système minier illégal
         "Delamar": ["Levski"],
         "Glaciem Ring": ["Breaker Alpha", "Novaloch"]
       }
     };
 
-    // Index des ressources par catégories
+    // ──────────────────────────────────────────
+    // ORE CATALOGUE
+    // ──────────────────────────────────────────
     const ores = {
       high: ["QUANTANIUM", "BEXALITE", "TARANITE", "LARANITE", "AGRICIUM", "BORASE", "HEPHESTANITE", "GOLD"],
-      std: ["STILERON", "SAVRILIUM", "OURATITE", "RICCITE", "LINDINIUM", "BERYL", "ASLARITE", "TITANIUM", "TUNGSTEN", "TORITE", "TIN", "QUARTZ", "CORUNDUM", "COPPER", "SILICON", "IRON", "ALUMINIUM", "ICE"],
-      fps: ["JANALITE", "FEYNMALINE", "HADANITE", "APHORITE", "DOLIVINE", "GLACOSITE", "BERADUM"],
+      std:  ["STILERON", "SAVRILIUM", "OURATITE", "RICCITE", "LINDINIUM", "BERYL", "ASLARITE", "TITANIUM",
+             "TUNGSTEN", "TORITE", "TIN", "QUARTZ", "CORUNDUM", "COPPER", "SILICON", "IRON", "ALUMINIUM", "ICE"],
+      fps:  ["JANALITE", "FEYNMALINE", "HADANITE", "APHORITE", "DOLIVINE", "GLACOSITE", "BERADUM"],
       salvage: ["RMC", "CMAT"]
     };
 
     let probData = null;
 
-    // GESTION D'INTERFACE
+    // ──────────────────────────────────────────
+    // DATE DISPLAY
+    // ──────────────────────────────────────────
+    function updateClock() {
+      const el = document.getElementById('dateDisplay');
+      if (!el) return;
+      const now = new Date();
+      el.textContent = now.toISOString().slice(0,19).replace('T', ' ') + ' UTC';
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ──────────────────────────────────────────
+    // TAB SWITCHING
+    // ──────────────────────────────────────────
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       document.getElementById('btn-' + tabId).classList.add('active');
-      
-      if(tabId === 'analytics' && !probData) {
-        document.getElementById('probResult').innerHTML = "<div class='loading-text'>Interrogation des databanks...</div>";
+      if (tabId === 'analytics' && !probData) {
+        document.getElementById('probResult').innerHTML = '<div class="loading-text">INTERROGATING DATABANKS</div>';
         loadProbabilities();
       }
     }
 
-    // LOGIQUE DE LOCALISATION ET SAUVEGARDE LOCALE
+    // ──────────────────────────────────────────
+    // DROPDOWNS & MEMORY
+    // ──────────────────────────────────────────
     function updateLocations() {
       const sys = document.getElementById('system').value;
       const lSel = document.getElementById('location');
       lSel.innerHTML = "";
-      
       if (universeMap[sys]) {
         Object.keys(universeMap[sys]).forEach(l => lSel.appendChild(new Option(l, l)));
       }
-      
-      localStorage.setItem('u404_system', sys); // Sauvegarde
+      localStorage.setItem('u404_sys', sys);
       updatePOIs();
     }
 
@@ -450,242 +968,208 @@
       const loc = document.getElementById('location').value;
       const dl = document.getElementById('poi-list');
       dl.innerHTML = "";
-      
-      if (universeMap[sys] && universeMap[sys][loc]) {
-        universeMap[sys][loc].forEach(p => { 
-          let o = document.createElement("option"); 
-          o.value = p; 
-          dl.appendChild(o); 
+      if (universeMap[sys]?.[loc]) {
+        universeMap[sys][loc].forEach(p => {
+          const o = document.createElement('option');
+          o.value = p;
+          dl.appendChild(o);
         });
       }
-      
-      localStorage.setItem('u404_location', loc); // Sauvegarde
+      localStorage.setItem('u404_loc', loc);
     }
 
-    // INTERACTION MINERAIS
+    // ──────────────────────────────────────────
+    // ORE INTERACTIONS
+    // ──────────────────────────────────────────
     function toggleOre(el) {
-      const input = el.querySelector('input');
-      input.checked = !input.checked;
+      const inp = el.querySelector('input');
+      inp.checked = !inp.checked;
       el.classList.toggle('selected');
       updateCounters();
     }
 
     function updateCounters() {
-      const countSelected = (gridId) => document.querySelectorAll(`#${gridId} .ore-btn.selected`).length;
-      document.getElementById('count-high').innerText = countSelected('shipHighGrid') || "";
-      document.getElementById('count-std').innerText = countSelected('shipStandardGrid') || "";
-      document.getElementById('count-fps').innerText = countSelected('fpsGrid') || "";
-      document.getElementById('count-salvage').innerText = countSelected('salvageGrid') || "";
+      const count = id => document.querySelectorAll(`#${id} .ore-btn.selected`).length;
+      const set = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n || '0'; };
+      set('count-high',    count('shipHighGrid'));
+      set('count-std',     count('shipStandardGrid'));
+      set('count-fps',     count('fpsGrid'));
+      set('count-salvage', count('salvageGrid'));
     }
 
-    // SOUMISSION DE PROTOCOLE
+    // ──────────────────────────────────────────
+    // FORM SUBMIT
+    // ──────────────────────────────────────────
     function submitForm() {
       const btn = document.getElementById('submitBtn');
-      const selectedInputs = Array.from(document.querySelectorAll('.ore-btn.selected input'));
-      
-      if(selectedInputs.length === 0 && document.getElementById('comment').value.trim() === "") {
-        alert("ALERTE: Impossible d'envoyer un signal vide. Sélectionnez un minerai ou signalez une note.");
+      const selected = Array.from(document.querySelectorAll('.ore-btn.selected input'));
+
+      if (!selected.length && !document.getElementById('comment').value.trim()) {
+        btn.textContent = '⚠  SELECT AT LEAST ONE ORE OR ADD A NOTE';
+        btn.classList.add('error');
+        setTimeout(() => {
+          btn.textContent = 'TRANSMIT TELEMETRY';
+          btn.classList.remove('error');
+        }, 2500);
         return;
       }
 
-      // UX Loading State
-      btn.innerHTML = "<span class='spinner'></span> TRANSMISSION PROTOCOLE..."; 
+      btn.innerHTML = '<span class="spinner"></span>TRANSMITTING...';
       btn.disabled = true;
-      btn.style.background = "#333";
-      
+      btn.classList.remove('success', 'error');
+
       const data = {
-        system: document.getElementById('system').value, 
+        system:   document.getElementById('system').value,
         location: document.getElementById('location').value,
-        poi: document.getElementById('poi').value, 
-        quality: document.getElementById('quality').value || 0,
-        comment: document.getElementById('comment').value, 
-        ores: selectedInputs.map(i => i.value)
+        poi:      document.getElementById('poi').value,
+        quality:  document.getElementById('quality').value || 0,
+        comment:  document.getElementById('comment').value,
+        ores:     selected.map(i => i.value)
       };
 
-      // Exécution via l'API REST Web App
-      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "VOTRE_URL_WEB_APP_ICI") {
+      const doSuccess = () => {
+        resetForm();
+        btn.textContent = '✓  TELEMETRY SYNCHRONIZED';
+        btn.classList.add('success');
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = 'TRANSMIT TELEMETRY'; btn.classList.remove('success'); }, 2800);
+      };
+
+      const doError = (err) => {
+        console.error(err);
+        btn.textContent = '✗  TRANSMISSION FAILED — RETRY';
+        btn.classList.add('error');
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = 'TRANSMIT TELEMETRY'; btn.classList.remove('error'); }, 3500);
+      };
+
+      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== 'VOTRE_URL_WEB_APP_ICI') {
         fetch(GAS_WEB_APP_URL, {
           method: 'POST',
-          redirect: 'follow', // Suivre la redirection Google
-          body: JSON.stringify({ action: "appendData", data: data }),
-          headers: { "Content-Type": "text/plain;charset=utf-8" }
+          redirect: 'follow',
+          body: JSON.stringify({ action: 'appendData', data }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         })
-        .then(res => res.json())
-        .then(response => {
-          if (response.error) throw new Error(response.error);
-          resetForm();
-          showSuccess(btn);
-        })
-        .catch(error => showError(btn, error));
+        .then(r => r.json())
+        .then(r => { if (r.error) throw new Error(r.error); doSuccess(); })
+        .catch(doError);
       } else if (typeof google !== 'undefined' && google.script) {
-        // Fallback pour exécution native (dans l'éditeur Google)
-        google.script.run
-          .withSuccessHandler(() => { resetForm(); showSuccess(btn); })
-          .withFailureHandler(err => showError(btn, err))
-          .appendData(data);
+        google.script.run.withSuccessHandler(doSuccess).withFailureHandler(doError).appendData(data);
       } else {
-        // Fallback local (simulation si aucune URL configurée)
-        console.log("Mock data payload:", data);
-        setTimeout(() => { resetForm(); showSuccess(btn); }, 1500);
+        console.log('Mock payload:', data);
+        setTimeout(doSuccess, 1200);
       }
     }
 
     function resetForm() {
-      document.querySelectorAll('.ore-btn').forEach(el => { 
-        el.classList.remove('selected'); 
-        el.querySelector('input').checked = false; 
-      });
+      document.querySelectorAll('.ore-btn').forEach(b => { b.classList.remove('selected'); b.querySelector('input').checked = false; });
       document.getElementById('quality').value = '0';
       document.getElementById('comment').value = '';
       document.getElementById('poi').value = '';
       updateCounters();
     }
 
-    function showSuccess(btn) {
-      btn.innerHTML = "TELEMETRY SYNCHRONIZED"; 
-      btn.style.background = "var(--success)";
-      btn.style.color = "#fff";
-      
-      // Retour à la normale après 2.5s
-      setTimeout(() => { 
-        btn.innerHTML = "TRANSMIT TELEMETRY"; 
-        btn.style.background = "var(--primary)"; 
-        btn.style.color = "#000";
-        btn.disabled = false; 
-      }, 2500);
-    }
-
-    function showError(btn, err) {
-      console.error(err);
-      btn.innerHTML = "TRANSMISSION FAILED (ORBITAL BLOCK)"; 
-      btn.style.background = "var(--error)";
-      btn.style.color = "#fff";
-      
-      setTimeout(() => { 
-        btn.innerHTML = "RETRY TRANSMISSION"; 
-        btn.style.background = "var(--primary)"; 
-        btn.style.color = "#000";
-        btn.disabled = false; 
-      }, 3000);
-    }
-
-    // TELEMETRIE & ANALYTIQUE
+    // ──────────────────────────────────────────
+    // ANALYTICS
+    // ──────────────────────────────────────────
     function loadProbabilities() {
-      const targetSel = document.getElementById('oreTarget');
-      
-      // Auto-remplissage du dropdown s'il est vide
-      if(targetSel.options.length === 0) {
-        const all = [...ores.high, ...ores.std, ...ores.fps, ...ores.salvage].sort();
-        all.forEach(r => targetSel.appendChild(new Option(r, r)));
+      const sel = document.getElementById('oreTarget');
+      if (!sel.options.length) {
+        [...ores.high, ...ores.std, ...ores.fps, ...ores.salvage].sort().forEach(r => sel.appendChild(new Option(r, r)));
       }
-      
-      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "VOTRE_URL_WEB_APP_ICI") {
+
+      if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== 'VOTRE_URL_WEB_APP_ICI') {
         fetch(`${GAS_WEB_APP_URL}?action=getProbabilityStats`)
-          .then(res => res.json())
-          .then(d => { 
-            if(d.error) throw new Error(d.error);
-            probData = d; 
-            displayProbability(); 
-          })
-          .catch(e => {
-            console.error(e);
-            document.getElementById('probResult').innerHTML = "<div class='stat-card' style='border-color:var(--error)'>ERREUR DE RECEPTION.</div>";
+          .then(r => r.json())
+          .then(d => { if (d.error) throw new Error(d.error); probData = d; displayProbability(); })
+          .catch(() => {
+            document.getElementById('probResult').innerHTML = '<div class="stat-card" style="border-left-color:var(--error);color:var(--error)">DATABANK UNREACHABLE</div>';
           });
       } else if (typeof google !== 'undefined' && google.script) {
-        // Fallback natif
         google.script.run
           .withSuccessHandler(d => { probData = d; displayProbability(); })
-          .withFailureHandler(e => {
-            document.getElementById('probResult').innerHTML = "<div class='stat-card' style='border-color:var(--error)'>ERREUR DE RECEPTION.</div>";
+          .withFailureHandler(() => {
+            document.getElementById('probResult').innerHTML = '<div class="stat-card" style="border-left-color:var(--error);color:var(--error)">DATABANK UNREACHABLE</div>';
           })
           .getProbabilityStats();
       } else {
-        // Mock local
         setTimeout(() => {
-          probData = { matrix: { "GOLD": [{location: "Daymar", probability: "45.2"}, {location: "Lyria", probability: "12.0"}] }, totalScans: 42 };
+          probData = { matrix: { "GOLD": [{location:"Daymar",probability:"62.5"},{location:"Lyria",probability:"38.0"},{location:"Wala",probability:"22.1"}] }, totalScans: 7 };
           displayProbability();
-        }, 1000);
+        }, 800);
       }
     }
 
     function displayProbability() {
-      if(!probData) return;
-      
+      if (!probData) return;
       const target = document.getElementById('oreTarget').value;
-      const resultDiv = document.getElementById('probResult');
-      
-      if (!probData.matrix) {
-        resultDiv.innerHTML = "<div class='stat-card'>AUCUNE DONNEE ENREGISTREE.</div>"; 
-        return; 
+      const div    = document.getElementById('probResult');
+      const data   = probData.matrix?.[target] || [];
+
+      if (!data.length) {
+        div.innerHTML = `<div class="stat-card" style="color:#1e3050;font-family:var(--font-mono);font-size:0.8em">// NO SCANS RECORDED FOR ${target}</div>`;
+        return;
       }
-      
-      const data = probData.matrix[target] || [];
-      
-      if(data.length === 0) { 
-        resultDiv.innerHTML = "<div class='stat-card'><strong style='color:#666'>AUCUN SCAN POSITIF DETECTE POUR CE MATERIAU.</strong></div>"; 
-        return; 
-      }
-      
-      let html = "";
-      data.slice(0, 8).forEach(o => {
-        html += `
-          <div class='stat-card'>
-            <strong class='stat-loc'>${o.location}</strong>
-            <span class='prob-val'>${o.probability}%</span>
+
+      const maxP = parseFloat(data[0].probability);
+      div.innerHTML = data.slice(0, 8).map((o, i) => {
+        const pct = ((parseFloat(o.probability) / maxP) * 100).toFixed(0);
+        return `
+          <div class="stat-card">
+            <span class="stat-rank">#${i+1}</span>
+            <span class="stat-loc">${o.location}</span>
+            <span class="prob-val">${o.probability}<span style="font-size:0.5em;opacity:0.6">%</span></span>
+            <div class="prob-bar-wrap"><div class="prob-bar" style="width:${pct}%"></div></div>
           </div>`;
-      });
-      resultDiv.innerHTML = html;
+      }).join('');
     }
 
-    // INITIALISATION OBLIGATOIRE DU TERMINAL 
-    function startTerminal() {
-      console.log("OS Terminal Booting...");
-      
-      // 1. Génération Automatique des Grilles de l'Interface
-      const pG = (id, items, cls) => {
+    // ──────────────────────────────────────────
+    // BOOT SEQUENCE
+    // ──────────────────────────────────────────
+    function boot() {
+      // Build ore grids
+      const buildGrid = (id, items, cls) => {
         const container = document.getElementById(id);
         if (!container) return;
-        items.forEach(i => {
+        items.forEach(name => {
           const div = document.createElement('div');
           div.className = `ore-btn ${cls}`;
-          div.innerHTML = `<input type="checkbox" value="${i}">${i}`;
+          div.innerHTML = `<input type="checkbox" value="${name}">${name}`;
           div.onclick = function() { toggleOre(this); };
           container.appendChild(div);
         });
       };
-      
-      pG('shipHighGrid', ores.high, 'tier-s');
-      pG('shipStandardGrid', ores.std, 'tier-b');
-      pG('fpsGrid', ores.fps, 'tier-fps');
-      pG('salvageGrid', ores.salvage, 'tier-salvage');
 
-      // 2. Initialisation des Sélecteurs Planétaires (Avec Mémoire Locale)
+      buildGrid('shipHighGrid',    ores.high,    'tier-s');
+      buildGrid('shipStandardGrid',ores.std,     'tier-b');
+      buildGrid('fpsGrid',         ores.fps,     'tier-fps');
+      buildGrid('salvageGrid',     ores.salvage, 'tier-salvage');
+
+      // Init system dropdown
       const sSel = document.getElementById('system');
-      if (sSel) {
-        Object.keys(universeMap).forEach(s => sSel.appendChild(new Option(s, s)));
-        sSel.onchange = updateLocations;
-        
-        const savedSys = localStorage.getItem('u404_system');
-        sSel.value = savedSys && universeMap[savedSys] ? savedSys : "Stanton";
-        
-        updateLocations();
-        
-        const savedLoc = localStorage.getItem('u404_location');
-        const locSel = document.getElementById('location');
-        if (savedLoc && Array.from(locSel.options).some(o => o.value === savedLoc)) {
-          locSel.value = savedLoc;
-        }
-        
-        document.getElementById('location').onchange = updatePOIs;
-        updatePOIs();
+      Object.keys(universeMap).forEach(s => sSel.appendChild(new Option(s, s)));
+      sSel.onchange = updateLocations;
+
+      const savedSys = localStorage.getItem('u404_sys');
+      sSel.value = (savedSys && universeMap[savedSys]) ? savedSys : 'Stanton';
+      updateLocations();
+
+      const savedLoc = localStorage.getItem('u404_loc');
+      const locSel = document.getElementById('location');
+      if (savedLoc && Array.from(locSel.options).some(o => o.value === savedLoc)) {
+        locSel.value = savedLoc;
       }
+      locSel.onchange = updatePOIs;
+      updatePOIs();
+
+      updateCounters();
+      console.log('[UNIT 404] Terminal online.');
     }
 
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", startTerminal);
-    } else {
-      startTerminal();
-    }
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', boot)
+      : boot();
   </script>
 </body>
 </html>
