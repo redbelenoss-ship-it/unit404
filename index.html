@@ -851,64 +851,49 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxXim3mL1icRQez1j7IrfnYVXtN1feknuGPqarzTnoMEkjqIbQHDqlgELodu5t71Zw_/exec";
 
     // ──────────────────────────────────────────
-    // UNIVERSE MAP (SC 4.0)
+    // DYNAMIC UNIVERSE MAP (STARMAP.SPACE API)
     // ──────────────────────────────────────────
-    const universeMap = {
-      "Stanton": {
-        "Hurston": [
-          "Lorville", "Everus Harbor",
-          "HDMS-Anderson", "HDMS-Bezdek", "HDMS-Edmond", "HDMS-Hadley",
-          "HDMS-Hahn", "HDMS-Lathan", "HDMS-Norgaard", "HDMS-Oparei",
-          "HDMS-Perlman", "HDMS-Pinewood", "HDMS-Ryder", "HDMS-Stanhope",
-          "HUR-L1 Green Glade", "HUR-L2 Faithful Dream", "HUR-L3 Thundering Express",
-          "HUR-L4 Melodic Fields", "HUR-L5 High Course"
-        ],
-        "Arial (Hurston)": ["HDMS-Bezdek", "HDMS-Lathan"],
-        "Aberdeen (Hurston)": ["HDMS-Anderson", "HDMS-Norgaard"],
-        "Magda (Hurston)": ["HDMS-Perlman", "HDMS-Ryder"],
-        "Ita (Hurston)": ["HDMS-Stanhope", "HDMS-Woodruff"],
-        "Crusader": [
-          "Orison", "Seraphim Station",
-          "CRU-L1 Ambitious Dream", "CRU-L4 Shallow Fields", "CRU-L5 Beautiful Glen"
-        ],
-        "Cellin (Crusader)": ["Security Post Kareah", "Gallete Family Farm", "Hickes Research"],
-        "Daymar (Crusader)": ["Benson Mining", "Kudre Ore", "Shubin Mining SCD-1", "ArcCorp Mining 141"],
-        "Yela (Crusader)": ["GrimHEX", "ArcCorp Mining 157"],
-        "ArcCorp": [
-          "Area18", "Baijini Point",
-          "ARC-L1 Wide Forest", "ARC-L2 Lively Pathway",
-          "ARC-L4 Faint Glen", "ARC-L5 Yellow Core"
-        ],
-        "Lyria (ArcCorp)": ["ArcCorp Mining 045", "ArcCorp Mining 048", "Shubin Mining SAL-2"],
-        "Wala (ArcCorp)": ["ArcCorp Mining 056", "ArcCorp Mining 061", "Samson & Sons"],
-        "microTech": [
-          "New Babbage", "Port Tressler",
-          "MIC-L1 Shallow Frontier", "MIC-L2 Long Forest",
-          "MIC-L4 Red Crossroads", "MIC-L5 Modern Icarus"
-        ],
-        "Calliope (microTech)": ["NT-999-XIX", "NT-999-XXII"],
-        "Clio (microTech)": ["NT-999-XVI"],
-        "Euterpe (microTech)": ["NT-999-XXXV"]
-      },
-      "Pyro": {
-        "Pyro I": ["Checkmate Station (L4)"],
-        "Monox (Pyro II)": ["Orbituary", "Rustville", "Stanton Gateway Station"],
-        "Bloom (Pyro III)": ["Orbituary Station"],
-        "Pyro IV": [],
-        "Pyro V": [],
-        "Adir (Pyro V-A)": [],
-        "Ignis (Pyro V-B)": [],
-        "Fairo (Pyro V-C)": ["Fed Canyon Outpost"],
-        "Fuego (Pyro V-D)": [],
-        "Vatra (Pyro V-E)": [],
-        "Vuur (Pyro V-F)": [],
-        "Terminus (Pyro VI)": ["Ruin Station"]
-      },
-      "Nyx": {
-        "Delamar": ["Levski"],
-        "Glaciem Ring": ["Breaker Alpha", "Novaloch"]
+    let universeMap = {};
+
+    async function fetchUniverseMap() {
+      const STARMAP_API = "https://starmap.space/api/v3/pois/index.php";
+      try {
+        const response = await fetch(STARMAP_API);
+        if (!response.ok) throw new Error("API Offline");
+        const rawData = await response.json();
+
+        const map = {};
+        rawData.forEach(poi => {
+          const sys = poi.System || "Unknown";
+          const loc = poi.Planet || "Deep Space";
+          const name = poi.PoiName || "unnamed POI";
+          const coords = (poi.XCoord && poi.YCoord && poi.ZCoord) 
+            ? ` (${Math.round(poi.XCoord)}, ${Math.round(poi.YCoord)}, ${Math.round(poi.ZCoord)})` 
+            : "";
+
+          if (!map[sys]) map[sys] = {};
+          if (!map[sys][loc]) map[sys][loc] = [];
+          map[sys][loc].push(name + coords);
+        });
+
+        // Tri alphabétique
+        const sortedMap = {};
+        Object.keys(map).sort().forEach(sys => {
+          sortedMap[sys] = {};
+          Object.keys(map[sys]).sort().forEach(loc => {
+            sortedMap[sys][loc] = map[sys][loc].sort();
+          });
+        });
+
+        universeMap = sortedMap;
+        return true;
+      } catch (err) {
+        console.error("[UNIT 404] Starmap API Error:", err);
+        // Fallback minimal
+        universeMap = { "Stanton": { "Hurston": ["Lorville"], "Crusader": ["Orison"], "ArcCorp": ["Area18"], "microTech": ["New Babbage"] } };
+        return false;
       }
-    };
+    }
 
     // ──────────────────────────────────────────
     // ORE CATALOGUE
@@ -1135,7 +1120,7 @@
     // ──────────────────────────────────────────
     // BOOT SEQUENCE
     // ──────────────────────────────────────────
-    function boot() {
+    async function boot() {
       // Build ore grids
       const buildGrid = (id, items, cls) => {
         const container = document.getElementById(id);
@@ -1154,13 +1139,18 @@
       buildGrid('fpsGrid',         ores.fps,     'tier-fps');
       buildGrid('salvageGrid',     ores.salvage, 'tier-salvage');
 
+      // Fetch dynamic universe data
+      console.log('[UNIT 404] Interrogating starmap.space...');
+      await fetchUniverseMap();
+
       // Init system dropdown
       const sSel = document.getElementById('system');
+      sSel.innerHTML = ""; // Clear
       Object.keys(universeMap).forEach(s => sSel.appendChild(new Option(s, s)));
       sSel.onchange = updateLocations;
 
       const savedSys = localStorage.getItem('u404_sys');
-      sSel.value = (savedSys && universeMap[savedSys]) ? savedSys : 'Stanton';
+      sSel.value = (savedSys && universeMap[savedSys]) ? savedSys : (universeMap['Stanton'] ? 'Stanton' : Object.keys(universeMap)[0]);
       updateLocations();
 
       const savedLoc = localStorage.getItem('u404_loc');
